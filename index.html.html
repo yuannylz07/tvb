@@ -206,11 +206,11 @@ function calculateGWA() {
     const gwa = total / units;
     document.getElementById("result").textContent = `Your GWA is ${gwa.toFixed(2)}`;
 
-    if (gwa >= 1.00 && gwa <= 1.70) {
+    if (gwa >= 1.00 && gwa <= 1.75) {
       showModal("🎉 Dean's Lister!", "Congratulations! You made it to the Dean's List! 🎓");
       launchConfetti();
       launchStars();
-    } else if (gwa > 1.70 && gwa <= 2.50) {
+    } else if (gwa > 1.75 && gwa <= 2.50) {
       showModal("👍 Good Job!", "Keep pushing for excellence! You're doing well!");
     } else if (gwa > 2.50) {
       showModal("📘 Keep Going!", "Don't give up! You can improve your GWA!");
@@ -320,3 +320,4 @@ function removeStars() {
 </script>
 </body>
 </html>
+
