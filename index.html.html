@@ -177,6 +177,7 @@ footer { margin-top: 24px; text-align: center; font-size: 0.8rem; color: var(--m
   </div>
 
   <button class="add" onclick="addSubject()">➕ Add Subject</button>
+  <button class="add" onclick="clearAll()">🧹 Clear All</button>
   <button class="calculate" onclick="calculateGWA()">📊 Calculate GWA</button>
 
   <div id="result" class="result"></div>
@@ -220,6 +221,23 @@ function addSubject() {
 
 function removeSubject(btn) {
   btn.parentElement.remove();
+}
+
+function clearAll() {
+  // Clear Midterm GWA
+  document.getElementById('midtermGWA').value = '';
+
+  // Clear all subjects inputs
+  const subjectDivs = subjectsContainer.querySelectorAll('.subject');
+  subjectDivs.forEach(sub => {
+    const inputs = sub.querySelectorAll('input');
+    inputs.forEach(input => input.value = '');
+  });
+
+  // Clear result and close modal if open
+  document.getElementById('result').innerHTML = '';
+  closeModal();
+  stopConfetti();
 }
 
 function calculateGWA() {
