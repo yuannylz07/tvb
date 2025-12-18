@@ -91,6 +91,24 @@ h1 { margin: 0 0 8px; text-align: center; color: var(--primary); font-size: 2rem
 body.dark .subject { background: rgba(255, 105, 180, 0.2); backdrop-filter: blur(12px); box-shadow: 0 0 12px rgba(255,105,180,0.5), 0 4px 20px rgba(0,0,0,0.25); border: 1px solid rgba(255, 105, 180, 0.4); }
 body.dark .subject input[type="number"] { background: rgba(255, 105, 180, 0.25); color: #fff; border-radius: 12px; border: 1px solid rgba(255, 182, 193, 0.4); font-size: 0.9rem; padding: 10px 12px; }
 
+.midterm input[type="number"] {
+  background: rgba(255,182,193,0.7);
+  color: var(--text);
+  border-radius: 14px;
+  width: 100%;
+  border: none;
+  font-size: 0.9rem;
+  padding: 10px 12px;
+  text-align: center;
+  transition: background .3s, color .3s, border .3s;
+}
+body.dark .midterm input[type="number"] {
+  background: rgba(255, 105, 180, 0.25);
+  color: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 182, 193, 0.4);
+}
+
 button { border: none; border-radius: 10px; padding: 12px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: background .3s, color .3s, transform .2s; font-family: 'Poppins', sans-serif; }
 .remove { background: rgba(255,105,180,0.2); color: #db2777; }
 body.dark .remove { background: rgba(255,105,180,0.2); color: #ff99c2; }
@@ -145,9 +163,8 @@ footer { margin-top: 24px; text-align: center; font-size: 0.8rem; color: var(--m
   </div>
 
   <!-- Midterm GWA input -->
-  <div class="subject" style="grid-template-columns: 1fr; justify-items: center; background: var(--secondary); margin-bottom: 20px;">
-    <input type="number" step="0.0001" min="1" max="5" id="midtermGWA" placeholder="Midterm GWA"
-           style="text-align:center; font-size:0.9rem; padding:10px 12px; border-radius:14px; width:100%; border:none; background: rgba(255,182,193,0.7); color: var(--text);">
+  <div class="subject midterm" style="grid-template-columns: 1fr; justify-items: center; margin-bottom: 20px;">
+    <input type="number" step="0.0001" min="1" max="5" id="midtermGWA" placeholder="Enter Midterm GWA">
   </div>
 
   <!-- Subjects container with one default input -->
@@ -206,18 +223,34 @@ function removeSubject(btn) {
 }
 
 function calculateGWA() {
-  const midterm = parseFloat(document.getElementById('midtermGWA').value) || 0;
+  const midtermInput = document.getElementById('midtermGWA');
+  const midterm = parseFloat(midtermInput.value);
+
+  if (!midterm) {
+    showModalError("Please enter your Midterm GWA before calculating.");
+    return;
+  }
+
   const subjectDivs = subjectsContainer.querySelectorAll('.subject');
   let totalUnits = 0;
   let totalPoints = 0;
+  let emptyFound = false;
 
   subjectDivs.forEach(sub => {
     const inputs = sub.querySelectorAll('input');
-    const grade = parseFloat(inputs[0].value) || 0;
-    const units = parseFloat(inputs[1].value) || 0;
-    totalUnits += units;
-    totalPoints += grade * units;
+    const grade = parseFloat(inputs[0].value);
+    const units = parseFloat(inputs[1].value);
+
+    if (!grade || !units) emptyFound = true;
+
+    totalUnits += units || 0;
+    totalPoints += (grade || 0) * (units || 0);
   });
+
+  if (emptyFound) {
+    showModalError("Please fill in all Final Grade and Units fields.");
+    return;
+  }
 
   let midtermWeighted = midterm * 0.5;
   let finalWeighted = totalUnits > 0 ? (totalPoints / totalUnits) * 0.5 : 0;
@@ -225,15 +258,12 @@ function calculateGWA() {
   let gwa = midtermWeighted + finalWeighted;
   gwa = parseFloat(gwa.toFixed(4)); 
 
-  showModal(gwa);
+  showModalResult(gwa);
 }
 
-function showModal(gwa) {
+function showModalResult(gwa) {
   modal.style.display = 'block';
-  
-
   const gwaText = gwa.toFixed(4);
-
   let message = "";
 
   if (gwa <= 1.75) {
@@ -248,6 +278,11 @@ function showModal(gwa) {
   modalMessage.innerHTML = message; 
 }
 
+function showModalError(message) {
+  modal.style.display = 'block';
+  stopConfetti();
+  modalMessage.innerHTML = `⚠️ ${message}`;
+}
 
 function closeModal() {
   modal.style.display = 'none';
@@ -300,4 +335,3 @@ function stopConfetti() {
 
 </body>
 </html>
-
