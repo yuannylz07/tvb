@@ -75,12 +75,12 @@ input:checked + .slider .icon-moon { color: var(--icon-active); }
 .slider:before { content: ""; position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; background-color: white; border-radius: 50%; transition: transform .3s, background .3s; }
 input:checked + .slider:before { transform: translateX(24px); }
 
-.top-icon { display: flex; justify-content: center; margin-top: 8px; margin-bottom: 24px; }
+.top-icon { display: flex; justify-content: center; margin-top: 8px; margin-bottom: 16px; }
 .top-icon img { width: 25%; max-width: 90px; height: auto; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 15px rgba(255, 105, 180, 0.5); transition: transform 0.3s, box-shadow 0.3s; }
 .top-icon img:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(255, 105, 180, 0.7); }
 
 h1 { margin: 0 0 8px; text-align: center; color: var(--primary); font-size: 2rem; font-family: 'Poppins', sans-serif; font-weight: 700; }
-.subtitle { text-align: center; font-size: 1rem; color: var(--muted); margin-bottom: 24px; }
+.subtitle { text-align: center; font-size: 1rem; color: var(--muted); margin-bottom: 16px; }
 
 .subject { display: grid; grid-template-columns: 1fr 0.8fr auto; gap: 12px; margin-bottom: 12px; background: var(--secondary); padding: 14px; border-radius: 14px; backdrop-filter: blur(8px); transition: transform .3s, box-shadow .3s, background .3s; }
 .subject:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); background: rgba(255,192,203,0.65); }
@@ -109,12 +109,6 @@ footer { margin-top: 24px; text-align: center; font-size: 0.8rem; color: var(--m
 .close-btn { margin-top: 20px; padding: 10px 20px; background: #fff; color: #ff69b4; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; transition: transform 0.2s; }
 .close-btn:hover { transform: scale(1.05); }
 
-.sparkle, .star { position: absolute; width: 6px; height: 6px; pointer-events: none; opacity: 0.9; animation: sparkleAnim 1.2s infinite; background: #fff; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
-.sparkle { width: 5px; height: 5px; border-radius: 50%; clip-path: none; background: #fff; }
-
-@keyframes sparkleAnim { 0% { transform: scale(0.5) rotate(0deg); opacity: 0.8; } 50% { transform: scale(1.2) rotate(180deg); opacity: 1; } 100% { transform: scale(0.5) rotate(360deg); opacity: 0.8; } }
-
-/* ----------- MOBILE RESPONSIVE ----------- */
 @media (max-width: 480px) {
   .container { padding: 6% 3%; border-radius: 16px; }
   h1 { font-size: 1.6rem; }
@@ -130,10 +124,9 @@ footer { margin-top: 24px; text-align: center; font-size: 0.8rem; color: var(--m
 }
 </style>
 </head>
-
 <body>
-<div class="container">
 
+<div class="container">
   <div class="top-bar">
     <label class="switch">
       <input type="checkbox" id="themeToggle">
@@ -151,7 +144,20 @@ footer { margin-top: 24px; text-align: center; font-size: 0.8rem; color: var(--m
     <img src="/hellokitty.png" alt="Hello Kitty" />
   </div>
 
-  <div id="subjects"></div>
+  <!-- Midterm GWA input -->
+  <div class="subject" style="grid-template-columns: 1fr; justify-items: center; background: var(--secondary); margin-bottom: 20px;">
+    <input type="number" step="0.0001" min="1" max="5" id="midtermGWA" placeholder="Midterm GWA"
+           style="text-align:center; font-size:0.9rem; padding:10px 12px; border-radius:14px; width:100%; border:none; background: rgba(255,182,193,0.7); color: var(--text);">
+  </div>
+
+  <!-- Subjects container with one default input -->
+  <div id="subjects">
+    <div class="subject">
+      <input type="number" step="0.0001" min="1" max="5" placeholder="Final Grade">
+      <input type="number" step="0.0001" min="1" max="5" placeholder="Units">
+      <button class="remove" onclick="removeSubject(this)">❌</button>
+    </div>
+  </div>
 
   <button class="add" onclick="addSubject()">➕ Add Subject</button>
   <button class="calculate" onclick="calculateGWA()">📊 Calculate GWA</button>
@@ -172,152 +178,126 @@ footer { margin-top: 24px; text-align: center; font-size: 0.8rem; color: var(--m
 <canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000;"></canvas>
 
 <script>
-// ------------- JS CODE (same as your original) -------------
-const toggle = document.getElementById("themeToggle");
-const modal = document.getElementById("gwaModal");
-const modalContent = document.getElementById("modalContent");
-const modalTitle = document.getElementById("modalTitle");
-const modalMessage = document.getElementById("modalMessage");
-const confettiCanvas = document.getElementById("confetti-canvas");
+const subjectsContainer = document.getElementById('subjects');
+const themeToggle = document.getElementById('themeToggle');
+const modal = document.getElementById('gwaModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalMessage = document.getElementById('modalMessage');
+const confettiCanvas = document.getElementById('confetti-canvas');
 const ctx = confettiCanvas.getContext('2d');
-let confettiParticles = [];
+
+themeToggle.addEventListener('change', () => {
+  document.body.classList.toggle('dark', themeToggle.checked);
+});
 
 function addSubject() {
-  const container = document.getElementById("subjects");
-  const div = document.createElement("div");
-  div.className = "subject";
+  const div = document.createElement('div');
+  div.className = 'subject';
   div.innerHTML = `
-    <input type="number" step="0.01" min="1" max="5" placeholder="Final Grade">
-    <input type="number" min="1" placeholder="Units">
-    <button class="remove" onclick="this.parentElement.remove()">✖</button>
+    <input type="number" step="0.0001" min="1" max="5" placeholder="Grade">
+    <input type="number" step="0.0001" min="1" max="5" placeholder="Units">
+    <button class="remove" onclick="removeSubject(this)">❌</button>
   `;
-  container.appendChild(div);
+  subjectsContainer.appendChild(div);
+}
+
+function removeSubject(btn) {
+  btn.parentElement.remove();
 }
 
 function calculateGWA() {
-  let total = 0, units = 0;
-  document.querySelectorAll(".subject").forEach(s => {
-    const g = parseFloat(s.children[0].value);
-    const u = parseFloat(s.children[1].value);
-    if (!isNaN(g) && !isNaN(u)) { total += g * u; units += u; }
+  const midterm = parseFloat(document.getElementById('midtermGWA').value) || 0;
+  const subjectDivs = subjectsContainer.querySelectorAll('.subject');
+  let totalUnits = 0;
+  let totalPoints = 0;
+
+  subjectDivs.forEach(sub => {
+    const inputs = sub.querySelectorAll('input');
+    const grade = parseFloat(inputs[0].value) || 0;
+    const units = parseFloat(inputs[1].value) || 0;
+    totalUnits += units;
+    totalPoints += grade * units;
   });
 
-  if (units) {
-    const gwa = total / units;
-    document.getElementById("result").textContent = `Your GWA is ${gwa.toFixed(2)}`;
+  let midtermWeighted = midterm * 0.5;
+  let finalWeighted = totalUnits > 0 ? (totalPoints / totalUnits) * 0.5 : 0;
 
-    if (gwa >= 1.00 && gwa <= 1.75) {
-      showModal("🎉 Dean's Lister!", "Congratulations! You made it to the Dean's List! 🎓");
-      launchConfetti();
-      launchStars();
-    } else if (gwa > 1.75 && gwa <= 2.50) {
-      showModal("👍 Good Job!", "Keep pushing for excellence! You're doing well!");
-    } else if (gwa > 2.50) {
-      showModal("📘 Keep Going!", "Don't give up! You can improve your GWA!");
-    }
+  let gwa = midtermWeighted + finalWeighted;
+  gwa = parseFloat(gwa.toFixed(4)); 
+
+  showModal(gwa);
+}
+
+function showModal(gwa) {
+  modal.style.display = 'block';
+  
+
+  const gwaText = gwa.toFixed(4);
+
+  let message = "";
+
+  if (gwa <= 1.75) {
+    message = `🎉 Congratulations! You made the Dean's List! Your GWA is: <span style="color:#ffeb3b; font-weight:700;">${gwaText}</span>`;
+    startConfetti();
+  } else if (gwa <= 2.0) {
+    message = `Good job! You are close to the Dean's List. Your GWA is: <span style="color:#ff9800; font-weight:700;">${gwaText}</span>`;
   } else {
-    document.getElementById("result").textContent = "Please enter at least one subject.";
+    message = `Keep pushing! Your GWA is: <span style="color:#f44336; font-weight:700;">${gwaText}</span>`;
   }
+
+  modalMessage.innerHTML = message; 
 }
 
-function showModal(title, message) {
-  modalTitle.textContent = title;
-  modalMessage.textContent = message;
-  modal.style.display = "block";
-}
-function closeModal() { 
-  modal.style.display = "none"; 
-  removeStars();
-}
-window.onclick = function(event) { if (event.target == modal) closeModal(); }
 
-toggle.addEventListener("change", () => {
-  document.body.classList.toggle("dark", toggle.checked);
-  localStorage.setItem("theme", toggle.checked ? "dark" : "light");
-});
-if (localStorage.getItem("theme") === "dark") {
-  document.body.classList.add("dark");
-  toggle.checked = true;
+function closeModal() {
+  modal.style.display = 'none';
+  stopConfetti();
 }
-addSubject();
 
-// ------------- Confetti & Stars same as your original -------------
-function launchConfetti() {
-  confettiParticles = [];
+let confettiArray = [];
+let animationId;
+
+function startConfetti() {
   confettiCanvas.width = window.innerWidth;
   confettiCanvas.height = window.innerHeight;
-  const colors = ["#ffb6c1","#ff69b4","#ffc0cb","#fff0f5","#ff77ff"];
-  const count = window.innerWidth < 480 ? 80 : 150; // mobile reduce particles
-  for (let i = 0; i < count; i++) {
-    confettiParticles.push({
+  confettiArray = [];
+  for(let i=0; i<150; i++){
+    confettiArray.push({
       x: Math.random() * confettiCanvas.width,
       y: Math.random() * confettiCanvas.height - confettiCanvas.height,
       r: Math.random() * 6 + 4,
-      d: Math.random() * 50,
-      color: colors[Math.floor(Math.random()*colors.length)],
+      d: Math.random() * 10 + 5,
+      color: `hsl(${Math.random()*360},100%,70%)`,
       tilt: Math.random() * 10 - 10,
-      tiltAngleIncremental: Math.random() * 0.07 + 0.05,
+      tiltAngleIncrement: Math.random() * 0.07 + 0.05,
       tiltAngle: 0
     });
   }
   animateConfetti();
-  setTimeout(()=>{ confettiParticles = []; ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height); }, 5000);
 }
-function drawConfetti() {
-  ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-  confettiParticles.forEach(p => {
+
+function animateConfetti() {
+  ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+  confettiArray.forEach(c => {
+    c.tiltAngle += c.tiltAngleIncrement;
+    c.y += (Math.cos(c.d) + 3 + c.r/2)/2;
+    c.tilt = Math.sin(c.tiltAngle) * 15;
     ctx.beginPath();
-    ctx.lineWidth = p.r / 2;
-    ctx.strokeStyle = p.color;
-    ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
-    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+    ctx.lineWidth = c.r/2;
+    ctx.strokeStyle = c.color;
+    ctx.moveTo(c.x + c.tilt + c.r/4, c.y);
+    ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r/4);
     ctx.stroke();
   });
-  updateConfetti();
+  animationId = requestAnimationFrame(animateConfetti);
 }
-function updateConfetti() {
-  confettiParticles.forEach(p => {
-    p.tiltAngle += p.tiltAngleIncremental;
-    p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
-    p.tilt = Math.sin(p.tiltAngle) * 15;
-    if (p.y > confettiCanvas.height) { p.y = -10; p.x = Math.random() * confettiCanvas.width; }
-  });
-}
-function animateConfetti() {
-  if (confettiParticles.length > 0) {
-    drawConfetti();
-    requestAnimationFrame(animateConfetti);
-  }
-}
-window.addEventListener('resize', () => {
-  confettiCanvas.width = window.innerWidth;
-  confettiCanvas.height = window.innerHeight;
-});
 
-// Star Sparkles
-let starInterval;
-function launchStars() {
-  removeStars();
-  for(let i=0;i<20;i++) createStar();
-  starInterval = setInterval(createStar, 350);
-}
-function createStar() {
-  const star = document.createElement("div");
-  star.className = "star";
-  star.style.left = Math.random()*modalContent.offsetWidth + "px";
-  star.style.top = Math.random()*modalContent.offsetHeight + "px";
-  star.style.width = (Math.random()*6+4) + "px";
-  star.style.height = star.style.width;
-  star.style.animationDuration = (Math.random()*1+0.8) + "s";
-  star.style.backgroundColor = ["#fff","#ffe6f0","#ffb6c1","#ff77ff"][Math.floor(Math.random()*4)];
-  modalContent.appendChild(star);
-  setTimeout(()=>{ star.remove(); }, 1500);
-}
-function removeStars() {
-  clearInterval(starInterval);
-  document.querySelectorAll(".star").forEach(s=>s.remove());
+function stopConfetti() {
+  cancelAnimationFrame(animationId);
+  ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
 }
 </script>
+
 </body>
 </html>
 
